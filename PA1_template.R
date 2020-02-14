@@ -1,21 +1,30 @@
 unzip(zipfile = "activity.zip", files = "activity.csv", overwrite = TRUE)
-datafile <-read.table(file = "activity.csv", header = TRUE, sep = ",", na.strings = "NA")
+activitydata <-read.table(file = "activity.csv", header = TRUE, sep = ",", na.strings = "NA")
 
-datafile$date <- as.Date(x = datafile$date, format = "%Y-%m-%d")
-str(datafile)
+activitydata$date <- as.Date(x = activitydata$date, format = "%Y-%m-%d")
+str(activitydata)
 library(dplyr)
 
-steps_per_day <- datafile %>% group_by(date) %>%  summarize(total = sum(steps), na.rm = TRUE)
+totalsteps <- activitydata %>% group_by(date) %>%  summarize(total = sum(steps, na.rm = TRUE))
 
 library(ggplot2)
-steps_per_day %>% ggplot(aes(x = total)) %>% geom_histogram()
+totalsteps %>% ggplot(aes(x = total)) + geom_histogram()
 
-steps_per_day %>% ggplot(aes(x = total)) + geom_histogram(bins = 100)
+totalsteps %>% ggplot(aes(x = total)) + geom_histogram(bins = 100)
 
-steps_per_interval <- datafile %>% group_by(interval) %>% summarize(average_interval = mean(steps, na.rm=TRUE))
+totalsteps %>% ggplot(aes(x = total)) + 
+  geom_histogram(color = "white" ,fill = "orange",bins = 25) + 
+  geom_vline(xintercept = mean(totalsteps$total, na.rm=TRUE), color = "blue", lwd = 1, lty = 2) +
+  geom_vline(xintercept = median(totalsteps$total, na.rm = TRUE), color = "purple", lwd = 1, lty=3) +
+  ggtitle("Histogram of total steps per day") +
+  ylab("Count") + 
+  xlab("Total steps per day") +
+  theme_bw()
 
-steps_per_interval %>% ggplot(aes(x = interval, y = average_interval)) + geom_line()
+intervalsteps <- activitydata %>% group_by(interval) %>% summarize(average_interval = mean(steps, na.rm=TRUE))
 
-steps_per_interval$interval[which.max(steps_per_interval$average_interval)]
-which.max(steps_per_interval$average_interval)
+intervalsteps %>% ggplot(aes(x = interval, y = average_interval)) + geom_line()
+
+intervalsteps$interval[which.max(intervalstepsl$average_interval)]
+which.max(intervalsteps$average_interval)
 
