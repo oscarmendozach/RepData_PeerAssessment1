@@ -23,8 +23,28 @@ totalsteps %>% ggplot(aes(x = total)) +
 
 intervalsteps <- activitydata %>% group_by(interval) %>% summarize(average_interval = mean(steps, na.rm=TRUE))
 
-intervalsteps %>% ggplot(aes(x = interval, y = average_interval)) + geom_line()
+intervalsteps %>% ggplot(aes(x = interval, y = average_interval)) + 
+  geom_line(color = "blue4", lwd = .5) + 
+  geom_vline(xintercept = intervalsteps$interval[which.max(intervalsteps$average_interval)], color = "red3", lwd = .5, lty = 2) +
+  ggtitle("Time plot of average steps per interval") + 
+  xlab ("Time interval") +
+  ylab ("Average steps number") + 
+  theme_bw()
 
-intervalsteps$interval[which.max(intervalstepsl$average_interval)]
+
+
+intervalsteps$interval[which.max(intervalsteps$average_interval)]
 which.max(intervalsteps$average_interval)
+
+##Imputting Missing values
+NAdays <- activitydata %>% filter(is.na(steps) == TRUE)
+
+NAdays %>% ggplot(aes(x = date, y = interval)) + 
+  geom_point(color = "green2") + 
+  ggtitle("Days with NA data") + 
+  xlab("Date") + 
+  ylab("Intervals with NA data") + 
+  theme(axis.text.x = element_text(angle = 90))
+
+sum(is.na(activitydata$steps))
 

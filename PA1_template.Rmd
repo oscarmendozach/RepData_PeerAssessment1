@@ -19,28 +19,28 @@ the dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 - Unzip the data file
 
-``` {r}
+``` {r echo = TRUE}
 unzip(zipfile = "activity.zip", files = "activity.csv", overwrite = TRUE)
 ```
 - Load and store the datafile in a dataframe object called "activitydata"
 
-```{r}
+```{r echo = TRUE}
 activitydata <-read.table(file = "activity.csv", header = TRUE, sep = ",", na.strings = "NA")
 
 str(activitydata)
 ```
 It is important to notice that the *date* variable is stored as a *factor*, rather than a *date*. 
 Let's change it to a more easy to handle format
-```{r}
+```{r echo = TRUE}
 activitydata$date <- as.Date(x = activitydata$date, format = "%Y-%m-%d")
 str(activitydata)
 ```
 In order to check the consistency, let's compute the number of *NA's* in the *steps* variable
-```{r}
+```{r echo = TRUE}
 sum(is.na(activitydata$steps))
 ```
 And the fraction of *NA's* is
-```{r}
+```{r echo = TRUE}
 sum(is.na(activitydata$steps))/nrow(activitydata)
 ```
 
@@ -52,7 +52,7 @@ library(dplyr)
 
 ```
 And then, the variable *totalsteps* is defined as follows, removing the *NA's* in the dataset using **na.rm=TRUE**  
-```{r}
+```{r echo = TRUE}
 totalsteps <- activitydata %>% group_by(date) %>%  summarize(total = sum(steps, na.rm = TRUE))
 head(totalsteps)
 ```
@@ -61,7 +61,7 @@ By using the *ggplot2* package, it is easier to create a plot using the grammar 
 library(ggplot2)
 ```
 And the Histogram for Total Steps per day is the following
-```{r}
+```{r echo = TRUE}
 totalsteps %>% ggplot(aes(x = total)) + 
   geom_histogram(color = "white" ,fill = "orange",bins = 25) + 
   geom_vline(xintercept = mean(totalsteps$total, na.rm=TRUE), color = "blue", lwd = 1, lty = 2) +
@@ -73,20 +73,59 @@ totalsteps %>% ggplot(aes(x = total)) +
 ```  
 
 Where the dashed line is the mean and the dotted line the median, with values:
-```{r}
+```{r echo = TRUE}
 mean(totalsteps$total, na.rm = TRUE)
 
 median(totalsteps$total, na.rm = TRUE)
 ```
 
-**Technical note**: The main difference between a histogram and a barplot is that the histogram is a one-variable, showing distributions in a
-simplistic fashion. A barplot, on the other hand, is a two-variable plot, in which we need to specify both x and y axis. In this, the plot is showing a histogram of total steps done per day, with a huge number of measurements in zero, which can 
+**Technical note**: The main difference between a histogram and a barplot is that the histogram is a one-variable plot, showing distributions in a
+simplistic fashion. A barplot, on the other hand, is a two-variable plot, in which we need to specify both x and y axis. In this example, the plot is showing a histogram of total steps done per day, with a huge number of measurements in zero showing total inactivity.
 ## What is the average daily activity pattern?
+Firstly, the variable *intervalsteps* is created and assigned the values of the mean per interval 
+```{r echo = TRUE}
+intervalsteps <- activitydata %>% group_by(interval) %>% summarize(average_interval = mean(steps, na.rm=TRUE))
+```
 
+```{r echo = TRUE}
+intervalsteps %>% ggplot(aes(x = interval, y = average_interval)) + 
+  geom_line(color = "blue4", lwd = .5) + 
+  geom_vline(xintercept = intervalsteps$interval[which.max(intervalsteps$average_interval)], color = "red3", lwd = .5, lty = 2) +
+  ggtitle("Time plot of average steps per time interval") + 
+  xlab ("Time interval") +
+  ylab ("Average steps number") + 
+  theme_bw()
+```
 
+The 5-minute interval in which there are a maximun number of steps, on average, is `r intervalsteps$interval[which.max(intervalsteps$average_interval)]` 
 
 ## Imputing missing values
+Firstly, let's compute the total number of missing values in the dataset
+```{r echo = TRUE}
+sum(is.na(activitydata$steps))
+```
+By looking at the pattern of the intervals and range, it is clear that the structure of the interval number is an indication of the time at which the number of steps was taken.
+For instace, *0* is 00:00 and *2355* is 23:55. For each day, there are 288 independent measurements.
 
+It is mandatory then to see if these NA values are random scattered across days, or, for instance, entire days when data was not recorded.
 
+```{r echo = TRUE}
+NAdays <- activitydata %>% filter(is.na(steps) == TRUE)
+
+head(NAdays)
+
+NAdays %>% ggplot(aes(x = date, y = interval)) + 
+  geom_point(color = "green2") + 
+  ggtitle("Days with NA data") + 
+  xlab("Date") + 
+  ylab("Intervals with NA data") + 
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+It is clear, by looking at the plot, that those where days when no data was recorded at all. That is, `r sum(is.na(activitydata$steps))/288` days.
+
+The strategy for filling in all of the missing values will be as follow:
+
+1. Take the mean 
 
 ## Are there differences in activity patterns between weekdays and weekends?

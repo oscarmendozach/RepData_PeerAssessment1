@@ -133,12 +133,78 @@ median(totalsteps$total, na.rm = TRUE)
 ```
 ## [1] 10395
 ```
+
+**Technical note**: The main difference between a histogram and a barplot is that the histogram is a one-variable plot, showing distributions in a
+simplistic fashion. A barplot, on the other hand, is a two-variable plot, in which we need to specify both x and y axis. In this example, the plot is showing a histogram of total steps done per day, with a huge number of measurements in zero showing total inactivity.
 ## What is the average daily activity pattern?
+Firstly, the variable *intervalsteps* is created and assigned the values of the mean per interval 
+
+```r
+intervalsteps <- activitydata %>% group_by(interval) %>% summarize(average_interval = mean(steps, na.rm=TRUE))
+```
 
 
+```r
+intervalsteps %>% ggplot(aes(x = interval, y = average_interval)) + 
+  geom_line(color = "blue4", lwd = .5) + 
+  geom_vline(xintercept = intervalsteps$interval[which.max(intervalsteps$average_interval)], color = "red3", lwd = .5, lty = 2) +
+  ggtitle("Time plot of average steps per time interval") + 
+  xlab ("Time interval") +
+  ylab ("Average steps number") + 
+  theme_bw()
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+
+The 5-minute interval in which there are a maximun number of steps, on average, is 835 
 
 ## Imputing missing values
+Firstly, let's compute the total number of missing values in the dataset
+
+```r
+sum(is.na(activitydata$steps))
+```
+
+```
+## [1] 2304
+```
+By looking at the pattern of the intervals and range, it is clear that the structure of the interval number is an indication of the time at which the number of steps was taken.
+For instace, *0* is 00:00 and *2355* is 23:55. For each day, there are 288 independent measurements.
+
+It is mandatory then to see if these NA values are random scattered across days, or, for instance, entire days when data was not recorded.
 
 
+```r
+NAdays <- activitydata %>% filter(is.na(steps) == TRUE)
+
+head(NAdays)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+```
+
+```r
+NAdays %>% ggplot(aes(x = date, y = interval)) + 
+  geom_point(color = "green2") + 
+  ggtitle("Days with NA data") + 
+  xlab("Date") + 
+  ylab("Intervals with NA data") + 
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+
+It is clear, by looking at the plot, that those where days when no data was recorded at all. That is, 8 days.
+
+The strategy for filling in all of the missing values will be as follow:
+
+1. Take the mean 
 
 ## Are there differences in activity patterns between weekdays and weekends?
