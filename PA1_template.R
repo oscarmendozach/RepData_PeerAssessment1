@@ -48,3 +48,24 @@ NAdays %>% ggplot(aes(x = date, y = interval)) +
 
 sum(is.na(activitydata$steps))
 
+##copy data to dataframe
+
+activitydatafilled <- activitydata
+
+x1 <- 1
+x2 <- 1
+
+for (x1 in 1:nrow(activitydatafilled)){
+  if (is.na(activitydatafilled$steps[x1]) == TRUE){
+    activitydatafilled$testcolumn[x1] <- intervalsteps$average_interval[x2]
+    x2 <- x2 + 1 
+  }
+  else {
+    x2 <- 1
+  }
+}
+
+head(activitydatafilled)
+
+head(activitydata)
+  

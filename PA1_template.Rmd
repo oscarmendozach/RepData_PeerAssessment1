@@ -124,8 +124,28 @@ NAdays %>% ggplot(aes(x = date, y = interval)) +
 
 It is clear, by looking at the plot, that those where days when no data was recorded at all. That is, `r sum(is.na(activitydata$steps))/288` days.
 
-The strategy for filling in all of the missing values will be as follow:
+The strategy for filling in all of the missing values will be as follow: Take the mean of the same interval and replace the NA with that value.
 
-1. Take the mean 
+```{r}
+activitydatafilled <- activitydata
+
+x1 <- 1
+x2 <- 1
+
+for (x1 in 1:nrow(activitydatafilled)){
+  if (is.na(activitydatafilled$steps[x1]) == TRUE){
+    activitydatafilled$steps[x1] <- intervalsteps$average_interval[x2]
+    x2 <- x2 + 1 
+  }
+  else {
+    x2 <- 1
+  }
+}
+
+head(activitydatafilled)
+
+head(activitydata)
+
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
