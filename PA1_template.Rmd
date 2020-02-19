@@ -74,9 +74,11 @@ totalsteps %>% ggplot(aes(x = total)) +
 
 Where the dashed line is the mean and the dotted line the median, with values:
 ```{r echo = TRUE}
-mean(totalsteps$total, na.rm = TRUE)
+meanq1 <- mean(totalsteps$total, na.rm = TRUE)
+print(meanq1)
 
-median(totalsteps$total, na.rm = TRUE)
+medianq1 <- median(totalsteps$total, na.rm = TRUE)
+print(medianq1)
 ```
 
 **Technical note**: The main difference between a histogram and a barplot is that the histogram is a one-variable plot, showing distributions in a
@@ -126,7 +128,7 @@ It is clear, by looking at the plot, that those where days when no data was reco
 
 The strategy for filling in all of the missing values will be as follow: Take the mean of the same interval and replace the NA with that value.
 
-```{r}
+```{r echo = TRUE}
 activitydatafilled <- activitydata
 
 x1 <- 1
@@ -148,4 +150,29 @@ head(activitydata)
 
 ```
 
+By plotting a histogram in a similar way as in exercise 1, it is possible to check whether if the new values have an impact in the mean and median
+```{r echo = TRUE}
+totalstepsfilled <- activitydatafilled %>% group_by(date) %>%  summarize(total = sum(steps, na.rm = TRUE))
+totalstepsfilled %>% ggplot(aes(x = total)) + 
+  geom_histogram(color = "white" ,fill = "orange",bins = 25) + 
+  geom_vline(xintercept = mean(totalstepsfilled$total, na.rm=TRUE), color = "blue", lwd = 1, lty = 2) +
+  geom_vline(xintercept = median(totalstepsfilled$total, na.rm = TRUE), color = "purple", lwd = 1, lty=3) +
+  ggtitle("Histogram of total steps per day") +
+  ylab("Count") + 
+  xlab("Total steps per day") +
+  theme_bw()
+```
+
+And the differences in the mean and median for this question are the following:
+```{r echo = TRUE}
+meanq3 <- mean(totalstepsfilled$total, na.rm = TRUE)
+print(meanq3) #mean of filled dataset
+print(meanq1) #mean of dataset with NA's
+
+medianq3 <- median(totalstepsfilled$total, na.rm = TRUE)
+print(medianq3) #median of filled dataset
+print(medianq1) #median of dataset with NA's
+```
 ## Are there differences in activity patterns between weekdays and weekends?
+
+

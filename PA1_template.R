@@ -8,9 +8,9 @@ library(dplyr)
 totalsteps <- activitydata %>% group_by(date) %>%  summarize(total = sum(steps, na.rm = TRUE))
 
 library(ggplot2)
-totalsteps %>% ggplot(aes(x = total)) + geom_histogram()
+#totalsteps %>% ggplot(aes(x = total)) + geom_histogram()
 
-totalsteps %>% ggplot(aes(x = total)) + geom_histogram(bins = 100)
+#totalsteps %>% ggplot(aes(x = total)) + geom_histogram(bins = 100)
 
 totalsteps %>% ggplot(aes(x = total)) + 
   geom_histogram(color = "white" ,fill = "orange",bins = 25) + 
@@ -57,7 +57,7 @@ x2 <- 1
 
 for (x1 in 1:nrow(activitydatafilled)){
   if (is.na(activitydatafilled$steps[x1]) == TRUE){
-    activitydatafilled$testcolumn[x1] <- intervalsteps$average_interval[x2]
+    activitydatafilled$steps[x1] <- intervalsteps$average_interval[x2]
     x2 <- x2 + 1 
   }
   else {
@@ -68,4 +68,25 @@ for (x1 in 1:nrow(activitydatafilled)){
 head(activitydatafilled)
 
 head(activitydata)
-  
+
+##plot histogram
+totalstepsfilled <- activitydatafilled %>% group_by(date) %>%  summarize(total = sum(steps, na.rm = TRUE))
+totalstepsfilled %>% ggplot(aes(x = total)) + 
+  geom_histogram(color = "white" ,fill = "orange",bins = 25) + 
+  geom_vline(xintercept = mean(totalstepsfilled$total, na.rm=TRUE), color = "blue", lwd = 1, lty = 2) +
+  geom_vline(xintercept = median(totalstepsfilled$total, na.rm = TRUE), color = "purple", lwd = 1, lty=3) +
+  ggtitle("Histogram of total steps per day") +
+  ylab("Count") + 
+  xlab("Total steps per day") +
+  theme_bw()
+
+##Differences in pattern according to weekday
+testdatasetfilled <- activitydatafilled
+
+weekday <- c("lunes", "martes", "miércoles", "jueves", "viernes")
+weekend <- c("sábado", "domingo")
+
+testdatasetfilled$weekday <- weekdays(testdatasetfilled$date)
+
+testdatasetfilled$weekday <- if(testdatasetfilled$weekday %in% weekday){testdatasetfilled$weekday = "weekday"}
+testdatasetfilled$weekday <- if(testdatasetfilled$weekday %in% weekend){testdatasetfilled$weekday = "weekend"}

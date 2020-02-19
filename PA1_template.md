@@ -119,7 +119,8 @@ totalsteps %>% ggplot(aes(x = total)) +
 Where the dashed line is the mean and the dotted line the median, with values:
 
 ```r
-mean(totalsteps$total, na.rm = TRUE)
+meanq1 <- mean(totalsteps$total, na.rm = TRUE)
+print(meanq1)
 ```
 
 ```
@@ -127,7 +128,8 @@ mean(totalsteps$total, na.rm = TRUE)
 ```
 
 ```r
-median(totalsteps$total, na.rm = TRUE)
+medianq1 <- median(totalsteps$total, na.rm = TRUE)
+print(medianq1)
 ```
 
 ```
@@ -249,4 +251,55 @@ head(activitydata)
 ## 6    NA 2012-10-01       25
 ```
 
+By plotting a histogram in a similar way as in exercise 1, it is possible to check whether if the new values have an impact in the mean and median
+
+```r
+totalstepsfilled <- activitydatafilled %>% group_by(date) %>%  summarize(total = sum(steps, na.rm = TRUE))
+totalstepsfilled %>% ggplot(aes(x = total)) + 
+  geom_histogram(color = "white" ,fill = "orange",bins = 25) + 
+  geom_vline(xintercept = mean(totalstepsfilled$total, na.rm=TRUE), color = "blue", lwd = 1, lty = 2) +
+  geom_vline(xintercept = median(totalstepsfilled$total, na.rm = TRUE), color = "purple", lwd = 1, lty=3) +
+  ggtitle("Histogram of total steps per day") +
+  ylab("Count") + 
+  xlab("Total steps per day") +
+  theme_bw()
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
+
+And the differences in the mean and median for this question are the following:
+
+```r
+meanq3 <- mean(totalstepsfilled$total, na.rm = TRUE)
+print(meanq3) #mean of filled dataset
+```
+
+```
+## [1] 10589.69
+```
+
+```r
+print(meanq1) #mean of dataset with NA's
+```
+
+```
+## [1] 9354.23
+```
+
+```r
+medianq3 <- median(totalstepsfilled$total, na.rm = TRUE)
+print(medianq3) #median of filled dataset
+```
+
+```
+## [1] 10766.19
+```
+
+```r
+print(medianq1) #median of dataset with NA's
+```
+
+```
+## [1] 10395
+```
 ## Are there differences in activity patterns between weekdays and weekends?
