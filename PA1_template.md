@@ -217,7 +217,10 @@ x2 <- 1
 for (x1 in 1:nrow(activitydatafilled)){
   if (is.na(activitydatafilled$steps[x1]) == TRUE){
     activitydatafilled$steps[x1] <- intervalsteps$average_interval[x2]
-    x2 <- x2 + 1 
+    x2 <- x2 + 1
+    if (x2 >= 288){
+      x2 <- 1
+    }
   }
   else {
     x2 <- 1
@@ -275,7 +278,7 @@ print(meanq3) #mean of filled dataset
 ```
 
 ```
-## [1] 10589.69
+## [1] 10766.25
 ```
 
 ```r
@@ -292,7 +295,7 @@ print(medianq3) #median of filled dataset
 ```
 
 ```
-## [1] 10766.19
+## [1] 10766.83
 ```
 
 ```r
@@ -303,3 +306,59 @@ print(medianq1) #median of dataset with NA's
 ## [1] 10395
 ```
 ## Are there differences in activity patterns between weekdays and weekends?
+Firstly, a factor variable must be created that indicates whether a given date is a weekday or weekend
+
+
+```r
+activitydatafilledday <- activitydatafilled
+
+weekday <- c("lunes", "martes", "miércoles", "jueves", "viernes")
+weekend <- c("sábado", "domingo")
+
+activitydatafilledday$weekday <- weekdays(activitydatafilledday$date)
+
+for (i in 1:nrow(activitydatafilledday)){
+  if (activitydatafilledday$weekday[i] %in% weekday){
+    activitydatafilledday$weekday[i] <- "weekday"
+  }
+  else {
+    activitydatafilledday$weekday[i] <- "weekend"
+  }
+}
+
+activitydatafilledday$weekday <- as.factor(activitydatafilledday$weekday)
+```
+
+And then a panel plot is created. In order to check differences in means, a new dataframe is created to store the mean values and plot them as well
+
+```r
+#data wrangling
+activitydatafilleddayfinal <- activitydatafilledday %>% 
+  group_by(weekday, interval) %>% 
+  summarise(avg_steps = mean(steps))
+
+
+#mean_days stores the step means per factor
+mean_days <- activitydatafilledday %>% 
+  group_by(weekday) %>% 
+  summarise(avg_steps = mean(steps))
+
+#final plot
+activitydatafilleddayfinal %>% ggplot(aes(x = interval, y = avg_steps)) +
+  geom_line(color="black", lty = 2, lwd = .5) +
+  ggtitle("Average steps measured during weekdays and weekends") + 
+  ylab("Average steps number") +
+  xlab("5-minute interval") +
+  facet_wrap(~weekday) + 
+  geom_hline(data = mean_days, aes(yintercept = avg_steps)) +
+  theme_light()
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
+
+##Conclusions
+Finally, it is clear that there are some difference between weekdays and weekends. 
+
+* The highest number during weekdays is in the morning, around 08:35. Depending on the country in which this data was taken, that could show people commuting to their jobs. After that peak, the steps number is relatively low, meaning that they started their daily job. 
+* The time interval clearly shows at what time the average person starts their day: during weekdays, at around 05:00. During weekends, around 07:30.
+* The overall shape of the plots may suggest that people walk more during weekdays than during weekends: By putting the mean of each day on the each plot, we can see that in reality the mean is higher for weekends. The number of steps is consistently higher due to many factors, such as hiking, walking to grocery stores, among others.

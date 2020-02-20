@@ -58,7 +58,10 @@ x2 <- 1
 for (x1 in 1:nrow(activitydatafilled)){
   if (is.na(activitydatafilled$steps[x1]) == TRUE){
     activitydatafilled$steps[x1] <- intervalsteps$average_interval[x2]
-    x2 <- x2 + 1 
+    x2 <- x2 + 1
+    if (x2 >= 288){
+      x2 <- 1
+    }
   }
   else {
     x2 <- 1
@@ -81,12 +84,42 @@ totalstepsfilled %>% ggplot(aes(x = total)) +
   theme_bw()
 
 ##Differences in pattern according to weekday
-testdatasetfilled <- activitydatafilled
+activitydatafilledday <- activitydatafilled
 
 weekday <- c("lunes", "martes", "miércoles", "jueves", "viernes")
 weekend <- c("sábado", "domingo")
 
-testdatasetfilled$weekday <- weekdays(testdatasetfilled$date)
+activitydatafilledday$weekday <- weekdays(activitydatafilledday$date)
 
-testdatasetfilled$weekday <- if(testdatasetfilled$weekday %in% weekday){testdatasetfilled$weekday = "weekday"}
-testdatasetfilled$weekday <- if(testdatasetfilled$weekday %in% weekend){testdatasetfilled$weekday = "weekend"}
+for (i in 1:nrow(activitydatafilledday)){
+  if (activitydatafilledday$weekday[i] %in% weekday){
+    activitydatafilledday$weekday[i] <- "weekday"
+  }
+  else {
+    activitydatafilledday$weekday[i] <- "weekend"
+  }
+}
+
+activitydatafilledday$weekday <- as.factor(activitydatafilledday$weekday)
+
+##make a panel plot
+#data wrangling
+activitydatafilleddayfinal <- activitydatafilledday %>% 
+  group_by(weekday, interval) %>% 
+  summarise(avg_steps = mean(steps))
+
+
+#mean_days stores the step means per factor
+mean_days <- activitydatafilledday %>% 
+  group_by(weekday) %>% 
+  summarise(avg_steps = mean(steps))
+
+#final plot
+activitydatafilleddayfinal %>% ggplot(aes(x = interval, y = avg_steps)) +
+  geom_line(color="black", lty = 2, lwd = .5) +
+  ggtitle("Average steps measured during weekdays and weekends") + 
+  ylab("Average steps number") +
+  xlab("5-minute interval") +
+  facet_wrap(~weekday) + 
+  geom_hline(data = mean_days, aes(yintercept = avg_steps)) +
+  theme_light()
