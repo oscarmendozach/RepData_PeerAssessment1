@@ -357,6 +357,7 @@ activitydatafilleddayfinal %>% ggplot(aes(x = interval, y = avg_steps)) +
 ![](PA1_template_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
 
 ##Conclusions
+
 Finally, it is clear that there are some difference between weekdays and weekends. 
 
 * The highest number during weekdays is in the morning, around 08:35. Depending on the country in which this data was taken, that could show people commuting to their jobs. After that peak, the steps number is relatively low, meaning that they started their daily job. 
